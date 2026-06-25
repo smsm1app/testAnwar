@@ -1181,7 +1181,7 @@ export default function InstallationsScreen({ permissions, currentUser }: Instal
                                   <div className="flex items-center gap-2">
                                     <h6 className="font-black text-slate-800 text-sm group-hover:text-indigo-700 transition-colors">{customer?.name || 'غير معروف'}</h6>
                                     <span className={`text-[9px] font-black px-2 py-0.5 rounded border ${t._type === 'fault' ? 'bg-rose-50 text-rose-700 border-rose-200' : 'bg-indigo-50 text-indigo-700 border-indigo-200'}`}>{t._label}</span>
-                                    <span className="text-[10px] font-mono font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200">{new Date(t.created_at).toLocaleDateString('en-CA')}</span>
+                                    <span className="text-[10px] font-mono font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200">{t.createdDate || (t.created_at ? new Date(t.created_at).toLocaleDateString('en-CA') : 'غير متوفر')}</span>
                                   </div>
                                   
                                   <div className="text-[11px] text-slate-600 space-y-1.5 font-bold">

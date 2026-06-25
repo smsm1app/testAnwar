@@ -161,8 +161,16 @@ function MaintenanceScreen({ permissions }: MaintenanceScreenProps) {
       setActionLoading(true);
       
       const finalTeamId: number | null = mntForm.teamId ? parseInt(mntForm.teamId) : null;
+      
+      let finalAssignedEmployee = '';
+      if (mntForm.isManualTeam) {
+        finalAssignedEmployee = mntForm.manualLeader;
+      } else if (finalTeamId) {
+        const team = teams.find(t => t.id === finalTeamId);
+        if (team) finalAssignedEmployee = team.leader;
+      }
 
-      const created = await api.createMaintenance(mntForm);
+      const created = await api.createMaintenance({ ...mntForm, assignedEmployee: finalAssignedEmployee });
       
       if (finalTeamId && created && created.id) {
         await api.assignTaskToTeam(created.id, 'maintenance', finalTeamId);
