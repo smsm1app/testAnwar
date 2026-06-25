@@ -1,0 +1,18 @@
+{
+  "cookies": [],
+  "origins": [
+    {
+      "origin": "http://localhost:3000",
+      "localStorage": [
+        {
+          "name": "token",
+          "value": "shams_7fd31091168299e424ab628becee4fde0c91baf1ddfa0376070b6bab4f169810"
+        },
+        {
+          "name": "user",
+          "value": "{\"id\":9999,\"name\":\"QA Admin\",\"username\":\"admin\",\"position\":\"Manager\",\"status\":\"active\",\"permissions\":{\"dashboard\":{\"view\":true,\"create\":false,\"edit\":false,\"delete\":false,\"approve\":false,\"export\":false},\"customers\":{\"view\":true,\"create\":true,\"edit\":true,\"delete\":true,\"approve\":false,\"export\":false},\"products\":{\"view\":true,\"create\":true,\"edit\":false,\"delete\":false,\"approve\":false,\"export\":false},\"inventory\":{\"view\":true,\"create\":true,\"edit\":false,\"delete\":false,\"approve\":false,\"export\":false},\"sales\":{\"view\":true,\"create\":false,\"edit\":false,\"delete\":false,\"approve\":false,\"export\":false},\"invoices\":{\"view\":true,\"create\":true,\"edit\":false,\"delete\":false,\"approve\":false,\"export\":false},\"installments\":{\"view\":false,\"create\":false,\"edit\":false,\"delete\":false,\"approve\":false,\"export\":false},\"bankSettlement\":{\"view\":false,\"create\":false,\"edit\":false,\"delete\":false,\"approve\":false,\"export\":false},\"maintenance\":{\"view\":true,\"create\":true,\"edit\":false,\"delete\":false,\"approve\":false,\"export\":false},\"faults\":{\"view\":false,\"create\":false,\"edit\":false,\"delete\":false,\"approve\":false,\"export\":false},\"installationTeams\":{\"view\":false,\"create\":false,\"edit\":false,\"delete\":false,\"approve\":false,\"export\":false},\"installationBookings\":{\"view\":false,\"create\":false,\"edit\":false,\"delete\":false,\"approve\":false,\"export\":false},\"reports\":{\"view\":false,\"create\":false,\"edit\":false,\"delete\":false,\"approve\":false,\"export\":false},\"employees\":{\"view\":false,\"create\":false,\"edit\":false,\"delete\":false,\"approve\":false,\"export\":false},\"settings\":{\"view\":false,\"create\":false,\"edit\":false,\"delete\":false,\"approve\":false,\"export\":false},\"auditLogs\":{\"view\":false,\"create\":false,\"edit\":false,\"delete\":false,\"approve\":false,\"export\":false},\"backups\":{\"view\":false,\"create\":false,\"edit\":false,\"delete\":false,\"approve\":false,\"export\":false},\"contracts\":{\"view\":true,\"create\":true,\"edit\":false,\"delete\":false,\"approve\":false,\"export\":false}}}"
+        }
+      ]
+    }
+  ]
+}
