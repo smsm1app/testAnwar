@@ -1,0 +1,15 @@
+node_modules/
+build/
+dist/
+dist-ssr/
+coverage/
+.DS_Store
+Thumbs.db
+*.log
+npm-debug.log*
+.env*
+!.env.example
+
+# Old JSON database files (replaced by Supabase)
+solar_energy_erp_db.json
+solar_erp_safety_backup_*.json

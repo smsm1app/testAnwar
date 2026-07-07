@@ -1,0 +1,6 @@
+{
+  "name": "نظام شمس العراق لإدارة الطاقة الشمسية",
+  "description": "نظام سحابي متكامل ومحترف لإدارة المبيعات، الصيانة، الأقساط، وفحص الأعطال لشركات الطاقة الشمسية بالأقمار والفرق الفنية.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
