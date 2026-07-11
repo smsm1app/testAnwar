@@ -75,7 +75,9 @@ function MaintenanceScreen({ permissions }: MaintenanceScreenProps) {
   const [selectedBookingForMnt, setSelectedBookingForMnt] = useState('');
 
   const [workerPaymentAmountsMnt, setWorkerPaymentAmountsMnt] = useState<Record<string, number>>({});
+  const [workerPaidInAdvanceMnt, setWorkerPaidInAdvanceMnt] = useState<Record<string, boolean>>({});
   const [workerPaymentAmountsFault, setWorkerPaymentAmountsFault] = useState<Record<string, number>>({});
+  const [workerPaidInAdvanceFault, setWorkerPaidInAdvanceFault] = useState<Record<string, boolean>>({});
 
   // Selected customer details (used during creation)
   const [selectedCustomerIdForForm, setSelectedCustomerIdForForm] = useState<number | null>(null);
@@ -197,8 +199,11 @@ function MaintenanceScreen({ permissions }: MaintenanceScreenProps) {
       
       // Save worker payments for maintenance
       const paymentsToSave: any[] = [];
-      Object.entries(workerPaymentAmountsMnt).forEach(([workerName, amount]) => {
-        if ((amount as number) > 0) {
+      const mntWorkerNames = Array.from(new Set([...Object.keys(workerPaymentAmountsMnt), ...Object.keys(workerPaidInAdvanceMnt)]));
+      mntWorkerNames.forEach((workerName) => {
+        const amount = workerPaymentAmountsMnt[workerName] || 0;
+        const isPaidInAdvance = workerPaidInAdvanceMnt[workerName] || false;
+        if (amount > 0 || isPaidInAdvance) {
           const w = workers.find(x => x.name === workerName);
           paymentsToSave.push({
             workerId: w ? w.id : 0,
@@ -207,7 +212,8 @@ function MaintenanceScreen({ permissions }: MaintenanceScreenProps) {
             taskType: 'maintenance',
             amount: amount,
             customerName: customers.find(c => c.id === parseInt(mntForm.customerId))?.name || 'غير محدد',
-            description: `أجر صيانة وقائية - ${mntForm.notes.substring(0, 30)}`
+            description: `أجر صيانة وقائية - ${mntForm.notes.substring(0, 30)}`,
+            isPaidInAdvance: isPaidInAdvance
           });
         }
       });
@@ -223,6 +229,7 @@ function MaintenanceScreen({ permissions }: MaintenanceScreenProps) {
       setSelectedCustomerPurchasedItems([]);
       setSelectedCustomerInvoicesList([]);
       setWorkerPaymentAmountsMnt({});
+      setWorkerPaidInAdvanceMnt({});
       setMaintenance(prev => [...prev, created]);
     } catch (err: any) {
       toast.error(err.message || 'حدث خطأ أثناء رصد الصيانة');
@@ -268,8 +275,11 @@ function MaintenanceScreen({ permissions }: MaintenanceScreenProps) {
 
       // Save worker payments for fault
       const paymentsToSave: any[] = [];
-      Object.entries(workerPaymentAmountsFault).forEach(([workerName, amount]) => {
-        if ((amount as number) > 0) {
+      const faultWorkerNames = Array.from(new Set([...Object.keys(workerPaymentAmountsFault), ...Object.keys(workerPaidInAdvanceFault)]));
+      faultWorkerNames.forEach((workerName) => {
+        const amount = workerPaymentAmountsFault[workerName] || 0;
+        const isPaidInAdvance = workerPaidInAdvanceFault[workerName] || false;
+        if (amount > 0 || isPaidInAdvance) {
           const w = workers.find(x => x.name === workerName);
           paymentsToSave.push({
             workerId: w ? w.id : 0,
@@ -278,7 +288,8 @@ function MaintenanceScreen({ permissions }: MaintenanceScreenProps) {
             taskType: 'fault',
             amount: amount,
             customerName: customers.find(c => c.id === parseInt(faultForm.customerId))?.name || 'غير محدد',
-            description: `أجر معالجة عطل (${finalFaultType})`
+            description: `أجر معالجة عطل (${finalFaultType})`,
+            isPaidInAdvance: isPaidInAdvance
           });
         }
       });
@@ -295,6 +306,7 @@ function MaintenanceScreen({ permissions }: MaintenanceScreenProps) {
       setSelectedCustomerPurchasedItems([]);
       setSelectedCustomerInvoicesList([]);
       setWorkerPaymentAmountsFault({});
+      setWorkerPaidInAdvanceFault({});
       setFaults(prev => [...prev, created]);
     } catch (err: any) {
       toast.error(err.message || 'أخفق تسجيل بلاغ الأعطال');
@@ -897,18 +909,31 @@ function MaintenanceScreen({ permissions }: MaintenanceScreenProps) {
                                 <div key={idx} className="flex items-center gap-3 bg-white p-2.5 rounded-xl border border-amber-100 shadow-sm">
                                   <User className="w-4 h-4 text-slate-500 shrink-0" />
                                   <span className="font-bold text-slate-800 text-xs flex-1">{name}</span>
-                                  <input
-                                    type="text"
-                                    placeholder="0"
-                                    value={workerPaymentAmountsMnt[name] ? workerPaymentAmountsMnt[name].toLocaleString('en-US') : ''}
-                                    onChange={(e) => {
-                                      const val = e.target.value.replace(/,/g, '');
-                                      const num = parseInt(val);
-                                      setWorkerPaymentAmountsMnt(prev => ({ ...prev, [name]: isNaN(num) ? 0 : num }));
-                                    }}
-                                    className="w-28 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs font-bold font-mono text-left focus:ring-2 focus:ring-amber-400 focus:outline-none"
-                                  />
-                                  <span className="text-[10px] font-bold text-slate-500 shrink-0">د.ع</span>
+                                  <div className="flex flex-col items-end gap-1">
+                                    <div className="flex items-center gap-2">
+                                      <input
+                                        type="text"
+                                        placeholder="0"
+                                        value={workerPaymentAmountsMnt[name] ? workerPaymentAmountsMnt[name].toLocaleString('en-US') : ''}
+                                        onChange={(e) => {
+                                          const val = e.target.value.replace(/,/g, '');
+                                          const num = parseInt(val);
+                                          setWorkerPaymentAmountsMnt(prev => ({ ...prev, [name]: isNaN(num) ? 0 : num }));
+                                        }}
+                                        className="w-28 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs font-bold font-mono text-left focus:ring-2 focus:ring-amber-400 focus:outline-none"
+                                      />
+                                      <span className="text-[10px] font-bold text-slate-500 shrink-0">د.ع</span>
+                                    </div>
+                                    <label className="flex items-center gap-1.5 cursor-pointer mt-1">
+                                      <input
+                                        type="checkbox"
+                                        checked={workerPaidInAdvanceMnt[name] || false}
+                                        onChange={(e) => setWorkerPaidInAdvanceMnt(prev => ({ ...prev, [name]: e.target.checked }))}
+                                        className="rounded text-amber-500 focus:ring-amber-500 w-3.5 h-3.5 cursor-pointer"
+                                      />
+                                      <span className="text-[10px] font-bold text-slate-600">تم محاسبة العامل</span>
+                                    </label>
+                                  </div>
                                 </div>
                               ))}
                             </div>
@@ -967,18 +992,31 @@ function MaintenanceScreen({ permissions }: MaintenanceScreenProps) {
                             <div key={idx} className="flex items-center gap-3 bg-white p-2.5 rounded-xl border border-amber-100 shadow-sm">
                               <User className="w-4 h-4 text-slate-500 shrink-0" />
                               <span className="font-bold text-slate-800 text-xs flex-1">{name}</span>
-                              <input
-                                type="text"
-                                placeholder="0"
-                                value={workerPaymentAmountsMnt[name] ? workerPaymentAmountsMnt[name].toLocaleString('en-US') : ''}
-                                onChange={(e) => {
-                                  const val = e.target.value.replace(/,/g, '');
-                                  const num = parseInt(val);
-                                  setWorkerPaymentAmountsMnt(prev => ({ ...prev, [name]: isNaN(num) ? 0 : num }));
-                                }}
-                                className="w-28 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs font-bold font-mono text-left focus:ring-2 focus:ring-amber-400 focus:outline-none"
-                              />
-                              <span className="text-[10px] font-bold text-slate-500 shrink-0">د.ع</span>
+                              <div className="flex flex-col items-end gap-1">
+                                <div className="flex items-center gap-2">
+                                  <input
+                                    type="text"
+                                    placeholder="0"
+                                    value={workerPaymentAmountsMnt[name] ? workerPaymentAmountsMnt[name].toLocaleString('en-US') : ''}
+                                    onChange={(e) => {
+                                      const val = e.target.value.replace(/,/g, '');
+                                      const num = parseInt(val);
+                                      setWorkerPaymentAmountsMnt(prev => ({ ...prev, [name]: isNaN(num) ? 0 : num }));
+                                    }}
+                                    className="w-28 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs font-bold font-mono text-left focus:ring-2 focus:ring-amber-400 focus:outline-none"
+                                  />
+                                  <span className="text-[10px] font-bold text-slate-500 shrink-0">د.ع</span>
+                                </div>
+                                <label className="flex items-center gap-1.5 cursor-pointer mt-1">
+                                  <input
+                                    type="checkbox"
+                                    checked={workerPaidInAdvanceMnt[name] || false}
+                                    onChange={(e) => setWorkerPaidInAdvanceMnt(prev => ({ ...prev, [name]: e.target.checked }))}
+                                    className="rounded text-amber-500 focus:ring-amber-500 w-3.5 h-3.5 cursor-pointer"
+                                  />
+                                  <span className="text-[10px] font-bold text-slate-600">تم محاسبة العامل</span>
+                                </label>
+                              </div>
                             </div>
                           ))}
                         </div>
@@ -1237,18 +1275,31 @@ function MaintenanceScreen({ permissions }: MaintenanceScreenProps) {
                                 <div key={idx} className="flex items-center gap-3 bg-white p-2.5 rounded-xl border border-amber-100 shadow-sm">
                                   <User className="w-4 h-4 text-slate-500 shrink-0" />
                                   <span className="font-bold text-slate-800 text-xs flex-1">{name}</span>
-                                  <input
-                                    type="text"
-                                    placeholder="0"
-                                    value={workerPaymentAmountsFault[name] ? workerPaymentAmountsFault[name].toLocaleString('en-US') : ''}
-                                    onChange={(e) => {
-                                      const val = e.target.value.replace(/,/g, '');
-                                      const num = parseInt(val);
-                                      setWorkerPaymentAmountsFault(prev => ({ ...prev, [name]: isNaN(num) ? 0 : num }));
-                                    }}
-                                    className="w-28 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs font-bold font-mono text-left focus:ring-2 focus:ring-amber-400 focus:outline-none"
-                                  />
-                                  <span className="text-[10px] font-bold text-slate-500 shrink-0">د.ع</span>
+                                  <div className="flex flex-col items-end gap-1">
+                                    <div className="flex items-center gap-2">
+                                      <input
+                                        type="text"
+                                        placeholder="0"
+                                        value={workerPaymentAmountsFault[name] ? workerPaymentAmountsFault[name].toLocaleString('en-US') : ''}
+                                        onChange={(e) => {
+                                          const val = e.target.value.replace(/,/g, '');
+                                          const num = parseInt(val);
+                                          setWorkerPaymentAmountsFault(prev => ({ ...prev, [name]: isNaN(num) ? 0 : num }));
+                                        }}
+                                        className="w-28 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs font-bold font-mono text-left focus:ring-2 focus:ring-amber-400 focus:outline-none"
+                                      />
+                                      <span className="text-[10px] font-bold text-slate-500 shrink-0">د.ع</span>
+                                    </div>
+                                    <label className="flex items-center gap-1.5 cursor-pointer mt-1">
+                                      <input
+                                        type="checkbox"
+                                        checked={workerPaidInAdvanceFault[name] || false}
+                                        onChange={(e) => setWorkerPaidInAdvanceFault(prev => ({ ...prev, [name]: e.target.checked }))}
+                                        className="rounded text-amber-500 focus:ring-amber-500 w-3.5 h-3.5 cursor-pointer"
+                                      />
+                                      <span className="text-[10px] font-bold text-slate-600">تم محاسبة العامل</span>
+                                    </label>
+                                  </div>
                                 </div>
                               ))}
                             </div>
@@ -1307,18 +1358,31 @@ function MaintenanceScreen({ permissions }: MaintenanceScreenProps) {
                             <div key={idx} className="flex items-center gap-3 bg-white p-2.5 rounded-xl border border-amber-100 shadow-sm">
                               <User className="w-4 h-4 text-slate-500 shrink-0" />
                               <span className="font-bold text-slate-800 text-xs flex-1">{name}</span>
-                              <input
-                                type="text"
-                                placeholder="0"
-                                value={workerPaymentAmountsFault[name] ? workerPaymentAmountsFault[name].toLocaleString('en-US') : ''}
-                                onChange={(e) => {
-                                  const val = e.target.value.replace(/,/g, '');
-                                  const num = parseInt(val);
-                                  setWorkerPaymentAmountsFault(prev => ({ ...prev, [name]: isNaN(num) ? 0 : num }));
-                                }}
-                                className="w-28 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs font-bold font-mono text-left focus:ring-2 focus:ring-amber-400 focus:outline-none"
-                              />
-                              <span className="text-[10px] font-bold text-slate-500 shrink-0">د.ع</span>
+                              <div className="flex flex-col items-end gap-1">
+                                <div className="flex items-center gap-2">
+                                  <input
+                                    type="text"
+                                    placeholder="0"
+                                    value={workerPaymentAmountsFault[name] ? workerPaymentAmountsFault[name].toLocaleString('en-US') : ''}
+                                    onChange={(e) => {
+                                      const val = e.target.value.replace(/,/g, '');
+                                      const num = parseInt(val);
+                                      setWorkerPaymentAmountsFault(prev => ({ ...prev, [name]: isNaN(num) ? 0 : num }));
+                                    }}
+                                    className="w-28 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs font-bold font-mono text-left focus:ring-2 focus:ring-amber-400 focus:outline-none"
+                                  />
+                                  <span className="text-[10px] font-bold text-slate-500 shrink-0">د.ع</span>
+                                </div>
+                                <label className="flex items-center gap-1.5 cursor-pointer mt-1">
+                                  <input
+                                    type="checkbox"
+                                    checked={workerPaidInAdvanceFault[name] || false}
+                                    onChange={(e) => setWorkerPaidInAdvanceFault(prev => ({ ...prev, [name]: e.target.checked }))}
+                                    className="rounded text-amber-500 focus:ring-amber-500 w-3.5 h-3.5 cursor-pointer"
+                                  />
+                                  <span className="text-[10px] font-bold text-slate-600">تم محاسبة العامل</span>
+                                </label>
+                              </div>
                             </div>
                           ))}
                         </div>

@@ -25,7 +25,13 @@ export default function InvoiceEditModal({ invoice, onClose, onSuccess }: Invoic
   const [items, setItems] = useState<any[]>(() => {
     return JSON.parse(JSON.stringify(parseJsonArray(invoice.items)));
   });
-  const [discount, setDiscount] = useState<number>(invoice.discount || 0);
+  const [manualFinalTotal, setManualFinalTotal] = useState<string>(() => {
+    const calcBase = parseJsonArray(invoice.items).reduce((acc: number, val: any) => acc + ((val.sellingPrice || 0) * (val.quantity || 1)), 0);
+    if (invoice.discount && invoice.discount > 0) {
+      return (calcBase - invoice.discount).toString();
+    }
+    return '';
+  });
   const [notes, setNotes] = useState<string>(invoice.notes || '');
   const [mastercardFee, setMastercardFee] = useState<number>(invoice.mastercardFee || 0);
   const [loading, setLoading] = useState(false);
@@ -45,7 +51,9 @@ export default function InvoiceEditModal({ invoice, onClose, onSuccess }: Invoic
   };
 
   const calculatedTotal = items.reduce((acc, val) => acc + (val.sellingPrice * val.quantity), 0);
-  const finalAmount = calculatedTotal - discount + (invoice.invoiceType === 'mastercard' ? mastercardFee : 0);
+  const baseFinalPayable = manualFinalTotal !== '' ? (parseInt(manualFinalTotal) || 0) : calculatedTotal;
+  const calculatedDiscount = calculatedTotal - baseFinalPayable;
+  const finalAmount = baseFinalPayable + (invoice.invoiceType === 'mastercard' ? mastercardFee : 0);
 
   const updateQty = (idx: number, qty: number) => {
     if (qty <= 0) return;
@@ -69,7 +77,7 @@ export default function InvoiceEditModal({ invoice, onClose, onSuccess }: Invoic
         customerId: invoice.customerId,
         invoiceType: invoice.invoiceType,
         items: items.map(i => ({ productId: i.productId, quantity: i.quantity, sellingPrice: i.sellingPrice })),
-        discount,
+        discount: calculatedDiscount,
         note: notes,
         mastercardFee,
       });
@@ -314,12 +322,16 @@ export default function InvoiceEditModal({ invoice, onClose, onSuccess }: Invoic
           <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap' }}>
             <div style={{ flex: '1 1 180px' }}>
               <label style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#64748b', fontSize: '12px', fontWeight: 600, marginBottom: '8px', letterSpacing: '0.04em' }}>
-                <Tag size={13} />الخصم الممنوح (د.ع)
+                <Calculator size={13} />السعر الإجمالي (يدوي)
               </label>
               <input
-                type="number"
-                value={discount}
-                onChange={e => setDiscount(parseFloat(e.target.value) || 0)}
+                type="text"
+                placeholder="تلقائي"
+                value={manualFinalTotal ? Number(manualFinalTotal).toLocaleString('en-US') : ''}
+                onChange={e => {
+                  const val = e.target.value.replace(/,/g, '');
+                  if (!isNaN(Number(val))) setManualFinalTotal(val);
+                }}
                 style={{
                   width: '100%', boxSizing: 'border-box',
                   background: 'rgba(15,23,42,0.8)',
@@ -338,6 +350,11 @@ export default function InvoiceEditModal({ invoice, onClose, onSuccess }: Invoic
                   e.currentTarget.style.boxShadow = 'none';
                 }}
               />
+              {calculatedDiscount > 0 && (
+                <div style={{ marginTop: '6px', fontSize: '11px', color: '#fbbf24', textAlign: 'center', fontWeight: 600 }}>
+                  (خصم: {calculatedDiscount.toLocaleString('en-US')} د.ع)
+                </div>
+              )}
             </div>
 
             {invoice.invoiceType === 'mastercard' && (

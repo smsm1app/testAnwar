@@ -580,7 +580,12 @@ export default function WorkersScreen({ permissions, currentUser }: WorkersScree
                                   
                                   {/* Payment amount */}
                                   <div className="shrink-0 flex flex-col items-center gap-1">
-                                    {paymentAmount > 0 ? (
+                                    {payment?.description?.includes('(تم المحاسبة)') ? (
+                                      <div className="bg-emerald-50 border border-emerald-200 px-4 py-2.5 rounded-xl text-center">
+                                        <div className="text-xs font-bold text-emerald-600 mb-0.5">حالة الأجر</div>
+                                        <div className="font-black text-emerald-700 text-sm">تم المحاسبة</div>
+                                      </div>
+                                    ) : paymentAmount > 0 ? (
                                       <div className="bg-amber-50 border border-amber-200 px-4 py-2.5 rounded-xl text-center">
                                         <div className="text-xs font-bold text-slate-500 mb-0.5">الأجر</div>
                                         <div className="font-black text-amber-700 font-mono text-sm">{formatMoney(paymentAmount)} د.ع</div>
@@ -643,7 +648,12 @@ export default function WorkersScreen({ permissions, currentUser }: WorkersScree
                                   
                                   {/* Payment amount */}
                                   <div className="shrink-0 flex flex-col items-center gap-1">
-                                    {paymentAmount > 0 ? (
+                                    {payment?.description?.includes('(تم المحاسبة)') ? (
+                                      <div className="bg-emerald-50 border border-emerald-200 px-4 py-2.5 rounded-xl text-center">
+                                        <div className="text-xs font-bold text-emerald-600 mb-0.5">حالة الأجر</div>
+                                        <div className="font-black text-emerald-700 text-sm">تم المحاسبة</div>
+                                      </div>
+                                    ) : paymentAmount > 0 ? (
                                       <div className="bg-amber-50 border border-amber-200 px-4 py-2.5 rounded-xl text-center">
                                         <div className="text-xs font-bold text-slate-500 mb-0.5">الأجر</div>
                                         <div className="font-black text-amber-700 font-mono text-sm">{formatMoney(paymentAmount)} د.ع</div>

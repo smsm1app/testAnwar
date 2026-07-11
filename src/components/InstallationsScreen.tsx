@@ -80,6 +80,7 @@ export default function InstallationsScreen({ permissions, currentUser }: Instal
   const [newWorkerName, setNewWorkerName] = useState('');
   const [viewingWorkerStats, setViewingWorkerStats] = useState<any>(null);
   const [workerPaymentAmounts, setWorkerPaymentAmounts] = useState<Record<string, number>>({});
+  const [workerPaidInAdvance, setWorkerPaidInAdvance] = useState<Record<string, boolean>>({});
   const [settlementAmount, setSettlementAmount] = useState('');
 
   // Teams form state
@@ -383,9 +384,14 @@ export default function InstallationsScreen({ permissions, currentUser }: Instal
       // Save worker payment amounts
       const selectedCustomer = customers.find(c => c.id === parseInt(customerId));
       const customerName = selectedCustomer?.name || '';
-      const paymentEntries = Object.entries(workerPaymentAmounts)
-        .filter(([_, amt]) => (amt as number) > 0)
-        .map(([workerName, amount]) => {
+      const allWorkerNames = Array.from(new Set([...Object.keys(workerPaymentAmounts), ...Object.keys(workerPaidInAdvance)]));
+      const paymentEntries = allWorkerNames
+        .filter(workerName => {
+          const amt = workerPaymentAmounts[workerName] || 0;
+          return amt > 0 || workerPaidInAdvance[workerName];
+        })
+        .map((workerName) => {
+          const amount = workerPaymentAmounts[workerName] || 0;
           const worker = workers.find(w => w.name === workerName);
           return {
             workerId: worker?.id || 0,
@@ -394,6 +400,7 @@ export default function InstallationsScreen({ permissions, currentUser }: Instal
             taskType: 'booking',
             amount,
             customerName,
+            isPaidInAdvance: workerPaidInAdvance[workerName] || false,
             description: `تركيب منظومة - ${customerName}`
           };
         });
@@ -1395,15 +1402,28 @@ export default function InstallationsScreen({ permissions, currentUser }: Instal
                                   <div key={idx} className="flex items-center gap-3 bg-white p-2.5 rounded-xl border border-amber-100 shadow-sm">
                                     <User className="w-4 h-4 text-slate-500 shrink-0" />
                                     <span className="font-bold text-slate-800 text-xs flex-1">{name}</span>
-                                    <input
-                                      type="number"
-                                      min="0"
-                                      placeholder="0"
-                                      value={workerPaymentAmounts[name] || ''}
-                                      onChange={(e) => setWorkerPaymentAmounts(prev => ({ ...prev, [name]: parseInt(e.target.value) || 0 }))}
-                                      className="w-28 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs font-bold font-mono text-left focus:ring-2 focus:ring-amber-400 focus:outline-none"
-                                    />
-                                    <span className="text-[10px] font-bold text-slate-500 shrink-0">د.ع</span>
+                                    <div className="flex flex-col items-end gap-1">
+                                      <div className="flex items-center gap-2">
+                                        <input
+                                          type="number"
+                                          min="0"
+                                          placeholder="0"
+                                          value={workerPaymentAmounts[name] || ''}
+                                          onChange={(e) => setWorkerPaymentAmounts(prev => ({ ...prev, [name]: parseInt(e.target.value) || 0 }))}
+                                          className="w-28 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs font-bold font-mono text-left focus:ring-2 focus:ring-amber-400 focus:outline-none"
+                                        />
+                                        <span className="text-[10px] font-bold text-slate-500 shrink-0">د.ع</span>
+                                      </div>
+                                      <label className="flex items-center gap-1.5 cursor-pointer mt-1">
+                                        <input
+                                          type="checkbox"
+                                          checked={workerPaidInAdvance[name] || false}
+                                          onChange={(e) => setWorkerPaidInAdvance(prev => ({ ...prev, [name]: e.target.checked }))}
+                                          className="rounded text-amber-500 focus:ring-amber-500 w-3.5 h-3.5 cursor-pointer"
+                                        />
+                                        <span className="text-[10px] font-bold text-slate-600">تم محاسبة العامل</span>
+                                      </label>
+                                    </div>
                                   </div>
                                 ))}
                               </div>
@@ -1465,18 +1485,31 @@ export default function InstallationsScreen({ permissions, currentUser }: Instal
                             <div key={idx} className="flex items-center gap-3 bg-white p-2.5 rounded-xl border border-amber-100 shadow-sm">
                               <User className="w-4 h-4 text-slate-500 shrink-0" />
                               <span className="font-bold text-slate-800 text-xs flex-1">{name}</span>
-                              <input
-                                type="text"
-                                placeholder="0"
-                                value={workerPaymentAmounts[name] ? workerPaymentAmounts[name].toLocaleString('en-US') : ''}
-                                onChange={(e) => {
-                                  const val = e.target.value.replace(/,/g, '');
-                                  const num = parseInt(val);
-                                  setWorkerPaymentAmounts(prev => ({ ...prev, [name]: isNaN(num) ? 0 : num }));
-                                }}
-                                className="w-28 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs font-bold font-mono text-left focus:ring-2 focus:ring-amber-400 focus:outline-none"
-                              />
-                              <span className="text-[10px] font-bold text-slate-500 shrink-0">د.ع</span>
+                              <div className="flex flex-col items-end gap-1">
+                                <div className="flex items-center gap-2">
+                                  <input
+                                    type="text"
+                                    placeholder="0"
+                                    value={workerPaymentAmounts[name] ? workerPaymentAmounts[name].toLocaleString('en-US') : ''}
+                                    onChange={(e) => {
+                                      const val = e.target.value.replace(/,/g, '');
+                                      const num = parseInt(val);
+                                      setWorkerPaymentAmounts(prev => ({ ...prev, [name]: isNaN(num) ? 0 : num }));
+                                    }}
+                                    className="w-28 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs font-bold font-mono text-left focus:ring-2 focus:ring-amber-400 focus:outline-none"
+                                  />
+                                  <span className="text-[10px] font-bold text-slate-500 shrink-0">د.ع</span>
+                                </div>
+                                <label className="flex items-center gap-1.5 cursor-pointer mt-1">
+                                  <input
+                                    type="checkbox"
+                                    checked={workerPaidInAdvance[name] || false}
+                                    onChange={(e) => setWorkerPaidInAdvance(prev => ({ ...prev, [name]: e.target.checked }))}
+                                    className="rounded text-amber-500 focus:ring-amber-500 w-3.5 h-3.5 cursor-pointer"
+                                  />
+                                  <span className="text-[10px] font-bold text-slate-600">تم محاسبة العامل</span>
+                                </label>
+                              </div>
                             </div>
                           ))}
                         </div>

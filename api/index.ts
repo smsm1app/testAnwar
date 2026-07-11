@@ -594,7 +594,7 @@ app.post('/api/worker-payments/bulk', authenticate, async (req: any, res) => {
     task_type: p.taskType || 'booking',
     amount: parseFloat(p.amount) || 0,
     customer_name: p.customerName || '',
-    description: p.description || '',
+    description: p.isPaidInAdvance ? `${p.description || ''} (تم المحاسبة)`.trim() : (p.description || ''),
     created_by: req.user.name
   }));
 
