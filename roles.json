@@ -1,0 +1,846 @@
+[
+  {
+    "id": 1,
+    "name": "مدير النظام (Admin)",
+    "description": "Updated at 2026-06-12T22:40:08.569Z",
+    "permissions": {
+      "dashboard": {
+        "view": true,
+        "create": true,
+        "edit": true,
+        "delete": true,
+        "approve": true,
+        "export": true,
+        "viewWidget": true
+      },
+      "customers": {
+        "view": true,
+        "create": true,
+        "edit": true,
+        "delete": true,
+        "approve": true,
+        "export": true,
+        "viewWidget": true
+      },
+      "products": {
+        "view": true,
+        "create": true,
+        "edit": true,
+        "delete": true,
+        "approve": true,
+        "export": true,
+        "viewWidget": true
+      },
+      "inventory": {
+        "view": true,
+        "create": true,
+        "edit": true,
+        "delete": true,
+        "approve": true,
+        "export": true,
+        "viewWidget": true
+      },
+      "sales": {
+        "view": true,
+        "create": true,
+        "edit": true,
+        "delete": true,
+        "approve": true,
+        "export": true,
+        "viewWidget": true
+      },
+      "invoices": {
+        "view": true,
+        "create": true,
+        "edit": true,
+        "delete": true,
+        "approve": true,
+        "export": true,
+        "viewWidget": true
+      },
+      "installments": {
+        "view": true,
+        "create": true,
+        "edit": true,
+        "delete": true,
+        "approve": true,
+        "export": true,
+        "viewWidget": true
+      },
+      "maintenance": {
+        "view": true,
+        "create": true,
+        "edit": true,
+        "delete": true,
+        "approve": true,
+        "export": true,
+        "viewWidget": true
+      },
+      "faults": {
+        "view": true,
+        "create": true,
+        "edit": true,
+        "delete": true,
+        "approve": true,
+        "export": true,
+        "viewWidget": true
+      },
+      "installationTeams": {
+        "view": true,
+        "create": true,
+        "edit": true,
+        "delete": true,
+        "approve": true,
+        "export": true,
+        "viewWidget": true
+      },
+      "installationBookings": {
+        "view": true,
+        "create": true,
+        "edit": true,
+        "delete": true,
+        "approve": true,
+        "export": true,
+        "viewWidget": true,
+        "viewInvoice": true
+      },
+      "reports": {
+        "view": true,
+        "create": true,
+        "edit": true,
+        "delete": true,
+        "approve": true,
+        "export": true,
+        "viewWidget": true
+      },
+      "employees": {
+        "view": true,
+        "create": true,
+        "edit": true,
+        "delete": true,
+        "approve": true,
+        "export": true,
+        "viewWidget": true
+      },
+      "settings": {
+        "view": true,
+        "create": true,
+        "edit": true,
+        "delete": true,
+        "approve": true,
+        "export": true,
+        "viewWidget": true
+      },
+      "auditLogs": {
+        "view": true,
+        "create": true,
+        "edit": true,
+        "delete": true,
+        "approve": true,
+        "export": true,
+        "viewWidget": true
+      },
+      "contracts": {
+        "view": true,
+        "create": true,
+        "edit": true,
+        "delete": true,
+        "approve": true,
+        "export": true,
+        "viewWidget": true
+      },
+      "bankSettlement": {
+        "view": true,
+        "create": true,
+        "edit": true,
+        "delete": true,
+        "approve": true,
+        "export": true,
+        "viewWidget": true
+      },
+      "backups": {
+        "view": true,
+        "create": true,
+        "edit": true,
+        "delete": true,
+        "approve": true,
+        "export": true,
+        "viewWidget": true
+      },
+      "workerSettlement": {
+        "view": true,
+        "create": true,
+        "edit": true,
+        "delete": true,
+        "approve": true,
+        "export": true,
+        "viewWidget": true
+      }
+    },
+    "isSystem": true
+  },
+  {
+    "id": 2,
+    "name": "مدير فرع (Manager)",
+    "description": "إدارة المبيعات والعملاء والمخزون",
+    "permissions": {
+      "dashboard": {
+        "view": true,
+        "create": true,
+        "edit": true,
+        "delete": true,
+        "approve": true,
+        "export": true,
+        "viewWidget": true
+      },
+      "customers": {
+        "view": true,
+        "create": true,
+        "edit": true,
+        "delete": false,
+        "approve": false,
+        "export": true,
+        "viewWidget": true
+      },
+      "products": {
+        "view": true,
+        "create": true,
+        "edit": true,
+        "delete": false,
+        "approve": false,
+        "export": true,
+        "viewWidget": true
+      },
+      "inventory": {
+        "view": true,
+        "create": true,
+        "edit": true,
+        "delete": false,
+        "approve": false,
+        "export": true,
+        "viewWidget": true
+      },
+      "sales": {
+        "view": true,
+        "create": true,
+        "edit": true,
+        "delete": false,
+        "approve": false,
+        "export": true,
+        "viewWidget": true
+      },
+      "invoices": {
+        "view": true,
+        "create": true,
+        "edit": true,
+        "delete": false,
+        "approve": false,
+        "export": true,
+        "viewWidget": true
+      },
+      "installments": {
+        "view": true,
+        "create": true,
+        "edit": true,
+        "delete": false,
+        "approve": false,
+        "export": true,
+        "viewWidget": true
+      },
+      "maintenance": {
+        "view": true,
+        "create": false,
+        "edit": false,
+        "delete": false,
+        "approve": false,
+        "export": false,
+        "viewWidget": true
+      },
+      "faults": {
+        "view": true,
+        "create": false,
+        "edit": false,
+        "delete": false,
+        "approve": false,
+        "export": false,
+        "viewWidget": true
+      },
+      "installationTeams": {
+        "view": true,
+        "create": false,
+        "edit": false,
+        "delete": false,
+        "approve": false,
+        "export": false,
+        "viewWidget": true
+      },
+      "installationBookings": {
+        "view": true,
+        "create": true,
+        "edit": true,
+        "delete": false,
+        "approve": false,
+        "export": true,
+        "viewWidget": true,
+        "viewInvoice": true
+      },
+      "reports": {
+        "view": true,
+        "create": false,
+        "edit": false,
+        "delete": false,
+        "approve": false,
+        "export": true,
+        "viewWidget": true
+      },
+      "employees": {
+        "view": true,
+        "create": false,
+        "edit": false,
+        "delete": false,
+        "approve": false,
+        "export": false,
+        "viewWidget": true
+      },
+      "settings": {
+        "view": true,
+        "create": false,
+        "edit": false,
+        "delete": false,
+        "approve": false,
+        "export": false,
+        "viewWidget": true
+      },
+      "auditLogs": {
+        "view": true,
+        "create": false,
+        "edit": false,
+        "delete": false,
+        "approve": false,
+        "export": false,
+        "viewWidget": true
+      },
+      "contracts": {
+        "view": true,
+        "create": false,
+        "edit": false,
+        "delete": false,
+        "approve": false,
+        "export": false,
+        "viewWidget": false
+      },
+      "bankSettlement": {
+        "view": true,
+        "create": false,
+        "edit": false,
+        "delete": false,
+        "approve": false,
+        "export": false,
+        "viewWidget": true
+      },
+      "backups": {
+        "view": false,
+        "create": false,
+        "edit": false,
+        "delete": false,
+        "approve": false,
+        "export": false,
+        "viewWidget": false
+      }
+    },
+    "isSystem": true
+  },
+  {
+    "id": 3,
+    "name": "المحاسب (Accountant)",
+    "description": "إدارة الفواتير والأقساط والتقارير المالية",
+    "permissions": {
+      "dashboard": {
+        "view": true,
+        "create": false,
+        "edit": false,
+        "delete": false,
+        "approve": false,
+        "export": false,
+        "viewWidget": true
+      },
+      "customers": {
+        "view": true,
+        "create": true,
+        "edit": true,
+        "delete": false,
+        "approve": false,
+        "export": true,
+        "viewWidget": true
+      },
+      "products": {
+        "view": true,
+        "create": false,
+        "edit": false,
+        "delete": false,
+        "approve": false,
+        "export": false,
+        "viewWidget": true
+      },
+      "inventory": {
+        "view": true,
+        "create": false,
+        "edit": false,
+        "delete": false,
+        "approve": false,
+        "export": false,
+        "viewWidget": true
+      },
+      "sales": {
+        "view": true,
+        "create": true,
+        "edit": true,
+        "delete": false,
+        "approve": false,
+        "export": true,
+        "viewWidget": true
+      },
+      "invoices": {
+        "view": true,
+        "create": true,
+        "edit": true,
+        "delete": false,
+        "approve": false,
+        "export": true,
+        "viewWidget": true
+      },
+      "installments": {
+        "view": true,
+        "create": true,
+        "edit": true,
+        "delete": false,
+        "approve": false,
+        "export": true,
+        "viewWidget": true
+      },
+      "maintenance": {
+        "view": false,
+        "create": false,
+        "edit": false,
+        "delete": false,
+        "approve": false,
+        "export": false
+      },
+      "faults": {
+        "view": false,
+        "create": false,
+        "edit": false,
+        "delete": false,
+        "approve": false,
+        "export": false
+      },
+      "installationTeams": {
+        "view": false,
+        "create": false,
+        "edit": false,
+        "delete": false,
+        "approve": false,
+        "export": false
+      },
+      "installationBookings": {
+        "view": true,
+        "create": false,
+        "edit": false,
+        "delete": false,
+        "approve": false,
+        "export": false,
+        "viewWidget": true,
+        "viewInvoice": false
+      },
+      "reports": {
+        "view": true,
+        "create": false,
+        "edit": false,
+        "delete": false,
+        "approve": false,
+        "export": true,
+        "viewWidget": true
+      },
+      "employees": {
+        "view": false,
+        "create": false,
+        "edit": false,
+        "delete": false,
+        "approve": false,
+        "export": false
+      },
+      "settings": {
+        "view": false,
+        "create": false,
+        "edit": false,
+        "delete": false,
+        "approve": false,
+        "export": false
+      },
+      "auditLogs": {
+        "view": false,
+        "create": false,
+        "edit": false,
+        "delete": false,
+        "approve": false,
+        "export": false,
+        "viewWidget": false
+      },
+      "contracts": {
+        "view": true,
+        "create": false,
+        "edit": false,
+        "delete": false,
+        "approve": false,
+        "export": false,
+        "viewWidget": false
+      },
+      "bankSettlement": {
+        "view": false,
+        "create": false,
+        "edit": false,
+        "delete": false,
+        "approve": false,
+        "export": false,
+        "viewWidget": false
+      },
+      "backups": {
+        "view": true,
+        "create": false,
+        "edit": false,
+        "delete": false,
+        "approve": false,
+        "export": true,
+        "viewWidget": true
+      }
+    },
+    "isSystem": true
+  },
+  {
+    "id": 4,
+    "name": "فني الصيانة (Technician)",
+    "description": "إدارة الصيانة والأعطال والتركيبات",
+    "permissions": {
+      "dashboard": {
+        "view": true,
+        "create": false,
+        "edit": false,
+        "delete": false,
+        "approve": false,
+        "export": false,
+        "viewWidget": true
+      },
+      "customers": {
+        "view": true,
+        "create": false,
+        "edit": false,
+        "delete": false,
+        "approve": false,
+        "export": false,
+        "viewWidget": true
+      },
+      "products": {
+        "view": true,
+        "create": false,
+        "edit": false,
+        "delete": false,
+        "approve": false,
+        "export": false,
+        "viewWidget": true
+      },
+      "inventory": {
+        "view": false,
+        "create": false,
+        "edit": false,
+        "delete": false,
+        "approve": false,
+        "export": false,
+        "viewWidget": false
+      },
+      "sales": {
+        "view": false,
+        "create": false,
+        "edit": false,
+        "delete": false,
+        "approve": false,
+        "export": false
+      },
+      "invoices": {
+        "view": false,
+        "create": false,
+        "edit": false,
+        "delete": false,
+        "approve": false,
+        "export": false
+      },
+      "installments": {
+        "view": false,
+        "create": false,
+        "edit": false,
+        "delete": false,
+        "approve": false,
+        "export": false
+      },
+      "maintenance": {
+        "view": true,
+        "create": true,
+        "edit": true,
+        "delete": false,
+        "approve": false,
+        "export": true,
+        "viewWidget": true
+      },
+      "faults": {
+        "view": true,
+        "create": true,
+        "edit": true,
+        "delete": false,
+        "approve": true,
+        "export": true,
+        "viewWidget": true
+      },
+      "installationTeams": {
+        "view": true,
+        "create": false,
+        "edit": false,
+        "delete": false,
+        "approve": true,
+        "export": false,
+        "viewWidget": true
+      },
+      "installationBookings": {
+        "view": true,
+        "create": true,
+        "edit": true,
+        "delete": false,
+        "approve": false,
+        "export": true,
+        "viewWidget": true,
+        "viewInvoice": true
+      },
+      "reports": {
+        "view": false,
+        "create": false,
+        "edit": false,
+        "delete": false,
+        "approve": false,
+        "export": false,
+        "viewWidget": true
+      },
+      "employees": {
+        "view": false,
+        "create": false,
+        "edit": false,
+        "delete": false,
+        "approve": false,
+        "export": false
+      },
+      "settings": {
+        "view": false,
+        "create": false,
+        "edit": false,
+        "delete": false,
+        "approve": false,
+        "export": false
+      },
+      "auditLogs": {
+        "view": false,
+        "create": false,
+        "edit": false,
+        "delete": false,
+        "approve": false,
+        "export": false
+      },
+      "bankSettlement": {
+        "view": true,
+        "create": false,
+        "edit": false,
+        "delete": false,
+        "approve": false,
+        "export": false,
+        "viewWidget": true
+      },
+      "backups": {
+        "view": false,
+        "create": false,
+        "edit": false,
+        "delete": false,
+        "approve": false,
+        "export": false,
+        "viewWidget": false
+      },
+      "contracts": {
+        "view": false,
+        "create": false,
+        "edit": false,
+        "delete": false,
+        "approve": false,
+        "export": false,
+        "viewWidget": false
+      }
+    },
+    "isSystem": true
+  },
+  {
+    "id": 5,
+    "name": "أمين الصندوق (Cashier)",
+    "description": "نقطة البيع وإصدار الفواتير فقط",
+    "permissions": {
+      "dashboard": {
+        "view": true,
+        "create": false,
+        "edit": false,
+        "delete": false,
+        "approve": false,
+        "export": false,
+        "viewWidget": true
+      },
+      "customers": {
+        "view": true,
+        "create": true,
+        "edit": false,
+        "delete": false,
+        "approve": false,
+        "export": false,
+        "viewWidget": true
+      },
+      "products": {
+        "view": true,
+        "create": false,
+        "edit": false,
+        "delete": false,
+        "approve": false,
+        "export": false,
+        "viewWidget": true
+      },
+      "inventory": {
+        "view": false,
+        "create": false,
+        "edit": false,
+        "delete": false,
+        "approve": false,
+        "export": false
+      },
+      "sales": {
+        "view": true,
+        "create": true,
+        "edit": false,
+        "delete": false,
+        "approve": false,
+        "export": false,
+        "viewWidget": true
+      },
+      "invoices": {
+        "view": true,
+        "create": false,
+        "edit": false,
+        "delete": false,
+        "approve": false,
+        "export": false,
+        "viewWidget": true
+      },
+      "installments": {
+        "view": true,
+        "create": false,
+        "edit": false,
+        "delete": false,
+        "approve": false,
+        "export": false,
+        "viewWidget": true
+      },
+      "maintenance": {
+        "view": false,
+        "create": false,
+        "edit": false,
+        "delete": false,
+        "approve": false,
+        "export": false
+      },
+      "faults": {
+        "view": false,
+        "create": false,
+        "edit": false,
+        "delete": false,
+        "approve": false,
+        "export": false
+      },
+      "installationTeams": {
+        "view": false,
+        "create": false,
+        "edit": false,
+        "delete": false,
+        "approve": false,
+        "export": false
+      },
+      "installationBookings": {
+        "view": false,
+        "create": false,
+        "edit": false,
+        "delete": false,
+        "approve": false,
+        "export": false
+      },
+      "reports": {
+        "view": false,
+        "create": false,
+        "edit": false,
+        "delete": false,
+        "approve": false,
+        "export": false
+      },
+      "employees": {
+        "view": false,
+        "create": false,
+        "edit": false,
+        "delete": false,
+        "approve": false,
+        "export": false
+      },
+      "settings": {
+        "view": false,
+        "create": false,
+        "edit": false,
+        "delete": false,
+        "approve": false,
+        "export": false
+      },
+      "auditLogs": {
+        "view": false,
+        "create": false,
+        "edit": false,
+        "delete": false,
+        "approve": false,
+        "export": false,
+        "viewWidget": false
+      },
+      "contracts": {
+        "view": false,
+        "create": false,
+        "edit": false,
+        "delete": false,
+        "approve": false,
+        "export": false,
+        "viewWidget": false
+      },
+      "bankSettlement": {
+        "view": false,
+        "create": false,
+        "edit": false,
+        "delete": false,
+        "approve": false,
+        "export": false,
+        "viewWidget": false
+      },
+      "backups": {
+        "view": false,
+        "create": false,
+        "edit": false,
+        "delete": false,
+        "approve": false,
+        "export": false,
+        "viewWidget": false
+      }
+    },
+    "isSystem": true
+  }
+]
