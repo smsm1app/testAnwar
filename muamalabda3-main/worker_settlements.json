@@ -1,0 +1,135 @@
+[
+  {
+    "id": 1781901810978,
+    "workerId": 1,
+    "bookingId": 24,
+    "settledAt": "2026-06-19T20:43:30.978Z",
+    "settledBy": "محمد الفاتح"
+  },
+  {
+    "id": 1781901813990,
+    "workerId": 5,
+    "bookingId": 24,
+    "settledAt": "2026-06-19T20:43:33.990Z",
+    "settledBy": "محمد الفاتح"
+  },
+  {
+    "id": 1781902294313,
+    "workerId": 1,
+    "bookingId": 25,
+    "settledAt": "2026-06-19T20:51:34.313Z",
+    "settledBy": "محمد الفاتح"
+  },
+  {
+    "id": 1781904746066,
+    "workerId": 2,
+    "taskId": 25,
+    "taskType": "booking",
+    "settledAt": "2026-06-19T21:32:26.066Z",
+    "settledBy": "محمد الفاتح"
+  },
+  {
+    "id": 1781904751854,
+    "workerId": 2,
+    "taskId": 24,
+    "taskType": "booking",
+    "settledAt": "2026-06-19T21:32:31.854Z",
+    "settledBy": "محمد الفاتح"
+  },
+  {
+    "id": 1781904961149,
+    "workerId": 2,
+    "taskId": 23,
+    "taskType": "fault",
+    "settledAt": "2026-06-19T21:36:01.149Z",
+    "settledBy": "محمد الفاتح"
+  },
+  {
+    "id": 1781904984731,
+    "workerId": 3,
+    "taskId": 24,
+    "taskType": "booking",
+    "settledAt": "2026-06-19T21:36:24.731Z",
+    "settledBy": "محمد الفاتح"
+  },
+  {
+    "id": 1781905310106,
+    "workerId": 3,
+    "taskId": 25,
+    "taskType": "booking",
+    "settledAt": "2026-06-19T21:41:50.106Z",
+    "settledBy": "محمد الفاتح"
+  },
+  {
+    "id": 1781905417900,
+    "workerId": 4,
+    "taskId": 24,
+    "taskType": "booking",
+    "settledAt": "2026-06-19T21:43:37.900Z",
+    "settledBy": "محمد الفاتح"
+  },
+  {
+    "id": 1781905736609,
+    "workerId": 6,
+    "taskId": 25,
+    "taskType": "booking",
+    "settledAt": "2026-06-19T21:48:56.609Z",
+    "settledBy": "محمد الفاتح"
+  },
+  {
+    "id": 1781905760754,
+    "workerId": 5,
+    "taskId": 25,
+    "taskType": "booking",
+    "settledAt": "2026-06-19T21:49:20.754Z",
+    "settledBy": "محمد الفاتح"
+  },
+  {
+    "id": 1782073753361,
+    "workerId": 4,
+    "taskId": 26,
+    "taskType": "booking",
+    "settledAt": "2026-06-21T20:29:13.361Z",
+    "settledBy": "محمد الفاتح"
+  },
+  {
+    "id": 1782073764362,
+    "workerId": 1,
+    "taskId": 26,
+    "taskType": "booking",
+    "settledAt": "2026-06-21T20:29:24.362Z",
+    "settledBy": "محمد الفاتح"
+  },
+  {
+    "id": 1782219532148,
+    "workerId": 2,
+    "taskId": 27,
+    "taskType": "booking",
+    "settledAt": "2026-06-23T12:58:52.148Z",
+    "settledBy": "محمد الفاتح"
+  },
+  {
+    "id": 1782219546125,
+    "workerId": 1,
+    "taskId": 27,
+    "taskType": "booking",
+    "settledAt": "2026-06-23T12:59:06.125Z",
+    "settledBy": "محمد الفاتح"
+  },
+  {
+    "id": 1782219549314,
+    "workerId": 1,
+    "taskId": 28,
+    "taskType": "booking",
+    "settledAt": "2026-06-23T12:59:09.314Z",
+    "settledBy": "محمد الفاتح"
+  },
+  {
+    "id": 1782220658866,
+    "workerId": 3,
+    "taskId": 27,
+    "taskType": "booking",
+    "settledAt": "2026-06-23T13:17:38.866Z",
+    "settledBy": "محمد الفاتح"
+  }
+]
