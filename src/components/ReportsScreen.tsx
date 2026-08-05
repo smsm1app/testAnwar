@@ -9,7 +9,7 @@ import { toast } from 'sonner';
 import {
   TrendingUp, Download, Upload, ShieldCheck, Database,
   Calendar, CheckSquare, Sparkles, Filter, FileSpreadsheet,
-  PieChart, Activity, Clock
+  PieChart, Activity, Clock, Receipt, CreditCard
 } from 'lucide-react';
 
 interface ReportsScreenProps {
@@ -141,21 +141,26 @@ export default function ReportsScreen({ onNavigate, permissions }: ReportsScreen
     if (type === 'pdf') {
       window.print();
     } else {
-      let csv = 'رقم الفاتورة,تاريخ الفاتورة,إجمالي المبلغ,تكلفة المواد,الربح الصافي\n';
+      let csv = 'رقم الفاتورة,تاريخ الفاتورة,اسم العميل,نوع الدفع,إجمالي المبلغ,المبلغ المقبوض,المتبقي (ذمة),تكلفة المواد,الربح الصافي\n';
       calculatedInvoices.forEach(i => {
         let items = [];
         try { items = Array.isArray(i.items) ? i.items : (typeof i.items === 'string' ? JSON.parse(i.items) : []); } catch(e) {}
         const cost = items.reduce((s: number, item: any) => s + ((item.purchasePrice || 0) * item.quantity), 0);
         const profit = i.finalAmount - cost;
-        csv += `${i.id},${new Date(i.date).toLocaleDateString('ar-IQ')},${i.finalAmount},${cost},${profit}\n`;
+        const typeLabel = i.invoiceType === 'cash' || i.invoiceType === 'retail' ? 'نقدي' :
+                          i.invoiceType === 'partial' ? 'ذمم جزئية' :
+                          i.invoiceType === 'installment' ? 'أقساط' : 'ماستركارد';
+        const remaining = i.remainingAmount || 0;
+        const paid = i.invoiceType === 'partial' ? (i.finalAmount - remaining) : (i.invoiceType === 'cash' ? i.finalAmount : (i.paidAmount || i.finalAmount - remaining));
+        csv += `${i.id},${new Date(i.date).toLocaleDateString('ar-IQ')},"${i.customerName || ''}",${typeLabel},${i.finalAmount},${paid},${remaining},${cost},${profit}\n`;
       });
-      csv += `\nالمجموع الكلي,,${totalSales},${totalCost},${marginProfit}\n`;
+      csv += `\nالمجموع الكلي,,,,${totalSales},${totalSales - partialRemainingDebtsPeriod},${partialRemainingDebtsPeriod},${totalCost},${marginProfit}\n`;
 
       const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `تقارير_المبيعات_${new Date().toISOString().split('T')[0]}.csv`;
+      a.download = `تقارير_المبيعات_والذمم_${new Date().toISOString().split('T')[0]}.csv`;
       a.click();
       toast.success('تم تصدير ملف CSV بنجاح');
     }
@@ -184,6 +189,13 @@ export default function ReportsScreen({ onNavigate, permissions }: ReportsScreen
   const cashSalesTotal = calculatedInvoices.filter(i => i.invoiceType === 'cash' || i.invoiceType === 'retail').reduce((acc, b) => acc + b.finalAmount, 0);
   const instSalesTotal = calculatedInvoices.filter(i => i.invoiceType === 'installment' || i.invoiceType === 'mastercard').reduce((acc, b) => acc + b.finalAmount, 0);
 
+  // Partial Debts calculations
+  const partialInvoices = calculatedInvoices.filter(i => i.invoiceType === 'partial');
+  const partialSalesTotal = partialInvoices.reduce((acc, b) => acc + (b.finalAmount || 0), 0);
+  const partialRemainingDebtsPeriod = partialInvoices.reduce((acc, b) => acc + (b.remainingAmount || 0), 0);
+  const partialPaidPeriod = partialSalesTotal - partialRemainingDebtsPeriod;
+  const partialDebtsAllActive = invoices.filter(i => i.status === 'active' && i.invoiceType === 'partial').reduce((acc, b) => acc + (b.remainingAmount || 0), 0);
+
   const installmentDebtsTotal = installments.reduce((acc, b) => acc + b.remainingAmount, 0);
 
   return (
@@ -199,7 +211,7 @@ export default function ReportsScreen({ onNavigate, permissions }: ReportsScreen
           </div>
           <div>
             <h1 className="text-2xl font-black text-slate-800">التقارير المتقدمة والنسخ الاحتياطي</h1>
-            <p className="text-slate-500 text-xs sm:text-sm mt-1.5 font-medium">نظرة شاملة على الأداء المالي، إدارة قواعد البيانات، وسجل الحركات الرقابي.</p>
+            <p className="text-slate-500 text-xs sm:text-sm mt-1.5 font-medium">نظرة شاملة على الأداء المالي، الذمم الجزئية والديون، إدارة قواعد البيانات، وسجل الحركات الرقابي.</p>
           </div>
         </div>
 
@@ -212,7 +224,7 @@ export default function ReportsScreen({ onNavigate, permissions }: ReportsScreen
                 activeSegment === 'financial' ? 'bg-white shadow-md text-amber-600' : 'text-slate-500 hover:text-slate-800'
               }`}
             >
-              الأداء المالي
+              الأداء المالي والذمم
             </button>
           )}
           {permissions?.backups?.view && (
@@ -304,57 +316,70 @@ export default function ReportsScreen({ onNavigate, permissions }: ReportsScreen
             </div>
           </div>
 
-          {/* Quick Numbers Widget */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {/* Quick Numbers Widgets */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5">
             
-            <div className="glass-card p-6 sm:p-8 rounded-[2.5rem] shadow-lg relative overflow-hidden group hover:-translate-y-1 transition-all duration-300">
+            <div className="glass-card p-6 rounded-[2.5rem] shadow-lg relative overflow-hidden group hover:-translate-y-1 transition-all duration-300">
               <div className="absolute -right-10 -top-10 w-32 h-32 bg-blue-400/20 rounded-full blur-2xl group-hover:bg-blue-400/40 transition-all"></div>
               <div className="relative z-10 flex flex-col h-full justify-between">
                 <div>
                   <span className="text-slate-500 text-xs font-black uppercase tracking-wider block mb-1">إجمالي الإيرادات</span>
-                  <p className="text-[10px] text-slate-400 font-bold">كل المبيعات الموثقة للفترة</p>
+                  <p className="text-[10px] text-slate-400 font-bold">كل المبيعات للفترة</p>
                 </div>
-                <div className="mt-6">
-                  <span className="text-3xl font-black font-mono text-slate-800 tracking-tighter block">{formatIQD(totalSales)}</span>
+                <div className="mt-4">
+                  <span className="text-2xl font-black font-mono text-slate-800 tracking-tighter block">{formatIQD(totalSales)}</span>
                 </div>
               </div>
             </div>
 
-            <div className="glass-card p-6 sm:p-8 rounded-[2.5rem] shadow-lg relative overflow-hidden group hover:-translate-y-1 transition-all duration-300">
+            <div className="glass-card p-6 rounded-[2.5rem] shadow-lg relative overflow-hidden group hover:-translate-y-1 transition-all duration-300">
               <div className="absolute -right-10 -top-10 w-32 h-32 bg-slate-400/20 rounded-full blur-2xl group-hover:bg-slate-400/40 transition-all"></div>
               <div className="relative z-10 flex flex-col h-full justify-between">
                 <div>
                   <span className="text-slate-500 text-xs font-black uppercase tracking-wider block mb-1">إجمالي التكاليف</span>
                   <p className="text-[10px] text-slate-400 font-bold">كلفة الشراء والتجهيز</p>
                 </div>
-                <div className="mt-6">
-                  <span className="text-3xl font-black font-mono text-slate-700 tracking-tighter block">{formatIQD(totalCost)}</span>
+                <div className="mt-4">
+                  <span className="text-2xl font-black font-mono text-slate-700 tracking-tighter block">{formatIQD(totalCost)}</span>
                 </div>
               </div>
             </div>
 
-            <div className="glass-card p-6 sm:p-8 rounded-[2.5rem] shadow-lg relative overflow-hidden group hover:-translate-y-1 transition-all duration-300 border-emerald-100 bg-emerald-50/30">
+            <div className="glass-card p-6 rounded-[2.5rem] shadow-lg relative overflow-hidden group hover:-translate-y-1 transition-all duration-300 border-emerald-100 bg-emerald-50/30">
               <div className="absolute -right-10 -top-10 w-32 h-32 bg-emerald-400/20 rounded-full blur-2xl group-hover:bg-emerald-400/40 transition-all"></div>
               <div className="relative z-10 flex flex-col h-full justify-between">
                 <div>
                   <span className="text-emerald-700 text-xs font-black uppercase tracking-wider block mb-1">الأرباح الصافية</span>
                   <p className="text-[10px] text-emerald-600/80 font-bold">فوارق الأسعار المقيدة</p>
                 </div>
-                <div className="mt-6">
-                  <span className="text-3xl font-black font-mono text-emerald-800 tracking-tighter block">{formatIQD(marginProfit)}</span>
+                <div className="mt-4">
+                  <span className="text-2xl font-black font-mono text-emerald-800 tracking-tighter block">{formatIQD(marginProfit)}</span>
                 </div>
               </div>
             </div>
 
-            <div className="glass-card p-6 sm:p-8 rounded-[2.5rem] shadow-lg relative overflow-hidden group hover:-translate-y-1 transition-all duration-300 border-rose-100 bg-rose-50/30">
+            <div className="glass-card p-6 rounded-[2.5rem] shadow-lg relative overflow-hidden group hover:-translate-y-1 transition-all duration-300 border-blue-100 bg-blue-50/30">
+              <div className="absolute -right-10 -top-10 w-32 h-32 bg-blue-500/20 rounded-full blur-2xl group-hover:bg-blue-500/40 transition-all"></div>
+              <div className="relative z-10 flex flex-col h-full justify-between">
+                <div>
+                  <span className="text-blue-700 text-xs font-black uppercase tracking-wider block mb-1">الذمم الجزئية المتبقية</span>
+                  <p className="text-[10px] text-blue-600/80 font-bold">فواتير البيع الجزئي</p>
+                </div>
+                <div className="mt-4">
+                  <span className="text-2xl font-black font-mono text-blue-800 tracking-tighter block">{formatIQD(partialDebtsAllActive)}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="glass-card p-6 rounded-[2.5rem] shadow-lg relative overflow-hidden group hover:-translate-y-1 transition-all duration-300 border-rose-100 bg-rose-50/30">
               <div className="absolute -right-10 -top-10 w-32 h-32 bg-rose-400/20 rounded-full blur-2xl group-hover:bg-rose-400/40 transition-all"></div>
               <div className="relative z-10 flex flex-col h-full justify-between">
                 <div>
-                  <span className="text-rose-700 text-xs font-black uppercase tracking-wider block mb-1">ذمم خارجية متأخرة</span>
-                  <p className="text-[10px] text-rose-600/80 font-bold">ديون أقساط قيد السداد</p>
+                  <span className="text-rose-700 text-xs font-black uppercase tracking-wider block mb-1">ديون الأقساط المتأخرة</span>
+                  <p className="text-[10px] text-rose-600/80 font-bold">عقود أقساط قيد السداد</p>
                 </div>
-                <div className="mt-6">
-                  <span className="text-3xl font-black font-mono text-rose-800 tracking-tighter block">{formatIQD(installmentDebtsTotal)}</span>
+                <div className="mt-4">
+                  <span className="text-2xl font-black font-mono text-rose-800 tracking-tighter block">{formatIQD(installmentDebtsTotal)}</span>
                 </div>
               </div>
             </div>
@@ -368,16 +393,16 @@ export default function ReportsScreen({ onNavigate, permissions }: ReportsScreen
                 <Activity className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="font-black text-lg text-slate-800">تقسيم التدفق النقدي</h3>
-                <p className="text-xs text-slate-400 font-medium">مبيعات مقيدة حسب نوع الدفع</p>
+                <h3 className="font-black text-lg text-slate-800">تقسيم التدفق النقدي والذمم</h3>
+                <p className="text-xs text-slate-400 font-medium">مبيعات مقيدة حسب نوع الدفع وحالة الذمم المالية</p>
               </div>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               
               <div className="p-6 bg-white/40 rounded-3xl border border-white shadow-sm transition-all hover:bg-white/60">
                 <span className="text-slate-500 font-bold text-sm block mb-2">نقدي مباشر ومفرد:</span>
-                <span className="font-black text-slate-800 font-mono text-3xl tracking-tighter">{formatIQD(cashSalesTotal)}</span>
+                <span className="font-black text-slate-800 font-mono text-2xl sm:text-3xl tracking-tighter">{formatIQD(cashSalesTotal)}</span>
                 <div className="w-full bg-slate-200/50 h-3 rounded-full mt-6 overflow-hidden shadow-inner">
                   <div className="bg-gradient-to-r from-blue-500 to-indigo-600 h-3 rounded-full transition-all duration-1000" style={{ width: `${totalSales > 0 ? (cashSalesTotal / totalSales) * 100 : 0}%` }}></div>
                 </div>
@@ -385,12 +410,103 @@ export default function ReportsScreen({ onNavigate, permissions }: ReportsScreen
 
               <div className="p-6 bg-white/40 rounded-3xl border border-white shadow-sm transition-all hover:bg-white/60">
                 <span className="text-slate-500 font-bold text-sm block mb-2">مبيعات التقسيط والماستركارد:</span>
-                <span className="font-black text-slate-800 font-mono text-3xl tracking-tighter">{formatIQD(instSalesTotal)}</span>
+                <span className="font-black text-slate-800 font-mono text-2xl sm:text-3xl tracking-tighter">{formatIQD(instSalesTotal)}</span>
                 <div className="w-full bg-slate-200/50 h-3 rounded-full mt-6 overflow-hidden shadow-inner">
                   <div className="bg-gradient-to-r from-amber-400 to-orange-500 h-3 rounded-full transition-all duration-1000" style={{ width: `${totalSales > 0 ? (instSalesTotal / totalSales) * 100 : 0}%` }}></div>
                 </div>
               </div>
 
+              <div className="p-6 bg-blue-50/40 rounded-3xl border border-blue-100 shadow-sm transition-all hover:bg-blue-50/70">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-blue-800 font-bold text-sm">فواتير الذمم الجزئية:</span>
+                  <span className="text-[10px] font-black bg-blue-100 text-blue-800 px-2 py-0.5 rounded-lg border border-blue-200">
+                    {partialInvoices.length} فاتورة
+                  </span>
+                </div>
+                <span className="font-black text-blue-950 font-mono text-2xl sm:text-3xl tracking-tighter">{formatIQD(partialSalesTotal)}</span>
+                
+                <div className="mt-3 flex justify-between items-center text-xs font-bold text-slate-600">
+                  <span className="text-emerald-700">المحصل: {formatIQD(partialPaidPeriod)}</span>
+                  <span className="text-rose-700">المتبقي ذمة: {formatIQD(partialRemainingDebtsPeriod)}</span>
+                </div>
+
+                <div className="w-full bg-slate-200/50 h-3 rounded-full mt-3 overflow-hidden shadow-inner flex">
+                  <div className="bg-emerald-500 h-3 transition-all duration-1000" style={{ width: `${partialSalesTotal > 0 ? (partialPaidPeriod / partialSalesTotal) * 100 : 0}%` }} title="الدفعة المحصلة"></div>
+                  <div className="bg-rose-500 h-3 transition-all duration-1000" style={{ width: `${partialSalesTotal > 0 ? (partialRemainingDebtsPeriod / partialSalesTotal) * 100 : 0}%` }} title="الذمة المتبقية"></div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          {/* Partial Receivables Detailed Table */}
+          <div className="glass-card p-6 sm:p-10 rounded-[2.5rem] shadow-xl space-y-6">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-blue-100/80 rounded-2xl flex items-center justify-center shadow-sm text-blue-600">
+                  <Receipt className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="font-black text-lg text-slate-800">سجل وفواتير الذمم الجزئية</h3>
+                  <p className="text-xs text-slate-500 font-medium">متابعة الفواتير المفتوحة ذات الدفع الجزئي والذمم المستحقة للشركة</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 bg-slate-100/80 px-4 py-2 rounded-2xl text-xs font-bold text-slate-600">
+                <span>عدد فواتير الذمم بالفترة:</span>
+                <span className="font-mono text-blue-700 font-black text-sm">{partialInvoices.length}</span>
+              </div>
+            </div>
+
+            <div className="overflow-x-auto rounded-3xl border border-white/80 bg-white/40 shadow-inner">
+              <table className="w-full text-right text-sm">
+                <thead>
+                  <tr className="bg-slate-100/60 text-slate-600 border-b border-white text-xs">
+                    <th className="p-4 font-bold">رقم الفاتورة</th>
+                    <th className="p-4 font-bold">تاريخ الفاتورة</th>
+                    <th className="p-4 font-bold">اسم العميل</th>
+                    <th className="p-4 font-bold">رقم الهاتف</th>
+                    <th className="p-4 font-bold">إجمالي الفاتورة</th>
+                    <th className="p-4 font-bold text-emerald-700">المبلغ المقبوض</th>
+                    <th className="p-4 font-bold text-rose-700">المتبقي (ذمة)</th>
+                    <th className="p-4 font-bold">الحالة</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/60 text-slate-700 font-medium text-xs">
+                  {partialInvoices.map((inv) => {
+                    const paid = inv.finalAmount - (inv.remainingAmount || 0);
+                    const remaining = inv.remainingAmount || 0;
+                    return (
+                      <tr key={inv.id} className="hover:bg-white/60 transition-colors">
+                        <td className="p-4 font-mono font-bold text-blue-700">#{inv.invoiceNumber || inv.id}</td>
+                        <td className="p-4 text-slate-500 font-mono">{new Date(inv.date).toLocaleDateString('ar-IQ')}</td>
+                        <td className="p-4 font-bold text-slate-800">{inv.customerName || 'عميل نقدي'}</td>
+                        <td className="p-4 font-mono text-slate-500">{inv.customerPhone || '—'}</td>
+                        <td className="p-4 font-mono font-black text-slate-800">{formatIQD(inv.finalAmount)}</td>
+                        <td className="p-4 font-mono font-black text-emerald-700 bg-emerald-50/50">{formatIQD(paid)}</td>
+                        <td className="p-4 font-mono font-black text-rose-700 bg-rose-50/50">{formatIQD(remaining)}</td>
+                        <td className="p-4">
+                          {remaining > 0 ? (
+                            <span className="px-2.5 py-1 rounded-xl text-[10px] font-black bg-rose-100 text-rose-800 border border-rose-200">
+                              ذمة مفتوحة
+                            </span>
+                          ) : (
+                            <span className="px-2.5 py-1 rounded-xl text-[10px] font-black bg-emerald-100 text-emerald-800 border border-emerald-200">
+                              مسددة بالكامل
+                            </span>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                  {partialInvoices.length === 0 && (
+                    <tr>
+                      <td colSpan={8} className="p-8 text-center text-slate-400 font-bold">
+                        لا توجد فواتير ذمم جزئية مسجلة في هذه الفترة.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
             </div>
           </div>
 
@@ -586,7 +702,7 @@ export default function ReportsScreen({ onNavigate, permissions }: ReportsScreen
           <div className="absolute inset-0 z-10 flex justify-between items-center px-8">
             <div>
               <h1 className="text-4xl font-black text-white mb-2">شركة أنوار الابداع</h1>
-              <p className="text-emerald-400 font-bold text-lg bg-emerald-950/50 px-4 py-1.5 rounded-full inline-block backdrop-blur-sm border border-emerald-500/30">التقرير المالي التحليلي الشامل</p>
+              <p className="text-emerald-400 font-bold text-lg bg-emerald-950/50 px-4 py-1.5 rounded-full inline-block backdrop-blur-sm border border-emerald-500/30">التقرير المالي والذمم التحليلي الشامل</p>
             </div>
             <div className="text-left bg-slate-900 p-4 rounded-2xl shadow-xl border border-slate-800">
               <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">تاريخ التقرير</p>
@@ -600,18 +716,22 @@ export default function ReportsScreen({ onNavigate, permissions }: ReportsScreen
 
         <div className="mt-8 relative z-10 px-8 pb-12 bg-slate-900">
           {/* Summary Cards */}
-          <div className="grid grid-cols-3 gap-6 mb-12">
+          <div className="grid grid-cols-4 gap-4 mb-12">
             <div className="border-l-4 border-l-blue-500 rounded-2xl p-4 bg-slate-800 shadow-lg print-break-inside-avoid overflow-hidden">
               <span className="text-slate-400 font-bold block mb-2 text-xs">إجمالي المبيعات</span>
-              <span className="text-xl font-black text-white block break-words" dir="ltr" style={{ fontSize: '1.25rem', lineHeight: '1.5' }}>{formatIQD(totalSales)}</span>
+              <span className="text-lg font-black text-white block break-words" dir="ltr" style={{ lineHeight: '1.4' }}>{formatIQD(totalSales)}</span>
             </div>
             <div className="border-l-4 border-l-slate-400 rounded-2xl p-4 bg-slate-800 shadow-lg print-break-inside-avoid overflow-hidden">
               <span className="text-slate-400 font-bold block mb-2 text-xs">إجمالي التكلفة</span>
-              <span className="text-xl font-black text-slate-300 block break-words" dir="ltr" style={{ fontSize: '1.25rem', lineHeight: '1.5' }}>{formatIQD(totalCost)}</span>
+              <span className="text-lg font-black text-slate-300 block break-words" dir="ltr" style={{ lineHeight: '1.4' }}>{formatIQD(totalCost)}</span>
             </div>
             <div className="border-l-4 border-l-emerald-500 rounded-2xl p-4 bg-emerald-950/40 shadow-lg print-break-inside-avoid overflow-hidden border border-emerald-900">
               <span className="text-emerald-400 font-bold block mb-2 text-xs">الربح الصافي الموحد</span>
-              <span className="text-xl font-black text-emerald-400 block break-words" dir="ltr" style={{ fontSize: '1.25rem', lineHeight: '1.5' }}>{formatIQD(marginProfit)}</span>
+              <span className="text-lg font-black text-emerald-400 block break-words" dir="ltr" style={{ lineHeight: '1.4' }}>{formatIQD(marginProfit)}</span>
+            </div>
+            <div className="border-l-4 border-l-cyan-500 rounded-2xl p-4 bg-cyan-950/40 shadow-lg print-break-inside-avoid overflow-hidden border border-cyan-900">
+              <span className="text-cyan-400 font-bold block mb-2 text-xs">الذمم الجزئية المتبقية</span>
+              <span className="text-lg font-black text-cyan-300 block break-words" dir="ltr" style={{ lineHeight: '1.4' }}>{formatIQD(partialDebtsAllActive)}</span>
             </div>
           </div>
 
@@ -619,39 +739,49 @@ export default function ReportsScreen({ onNavigate, permissions }: ReportsScreen
             <div className="w-8 h-8 bg-slate-800 rounded-lg flex items-center justify-center text-blue-400 border border-slate-700">
               <FileSpreadsheet className="w-4 h-4" />
             </div>
-            التفاصيل المالية (الفواتير)
+            التفاصيل المالية والذمم (الفواتير)
           </h3>
           
           <div className="rounded-2xl overflow-hidden border border-slate-800 shadow-xl">
             <table className="w-full text-right border-collapse bg-slate-900">
               <thead>
-                <tr className="bg-slate-950 text-slate-300 border-b border-slate-800">
-                  <th className="p-4 font-bold text-sm">رقم الفاتورة</th>
-                  <th className="p-4 font-bold text-sm">التاريخ</th>
-                  <th className="p-4 font-bold text-sm">إجمالي الفاتورة</th>
-                  <th className="p-4 font-bold text-sm text-slate-400">التكلفة</th>
-                  <th className="p-4 font-bold text-sm text-emerald-400">الربح الصافي</th>
+                <tr className="bg-slate-950 text-slate-300 border-b border-slate-800 text-xs">
+                  <th className="p-3 font-bold">رقم الفاتورة</th>
+                  <th className="p-3 font-bold">التاريخ</th>
+                  <th className="p-3 font-bold">اسم العميل</th>
+                  <th className="p-3 font-bold">نوع الدفع</th>
+                  <th className="p-3 font-bold">إجمالي الفاتورة</th>
+                  <th className="p-3 font-bold text-cyan-400">المتبقي (ذمة)</th>
+                  <th className="p-3 font-bold text-slate-400">التكلفة</th>
+                  <th className="p-3 font-bold text-emerald-400">الربح الصافي</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/50">
+              <tbody className="divide-y divide-slate-800/50 text-xs">
                 {calculatedInvoices.map((i, index) => {
                   let items = [];
                   try { items = Array.isArray(i.items) ? i.items : (typeof i.items === 'string' ? JSON.parse(i.items) : []); } catch(e){}
                   const cost = items.reduce((s: number, item: any) => s + ((item.purchasePrice || 0) * item.quantity), 0);
                   const profit = i.finalAmount - cost;
+                  const typeLabel = i.invoiceType === 'cash' || i.invoiceType === 'retail' ? 'نقدي' :
+                                    i.invoiceType === 'partial' ? 'ذمم جزئية' :
+                                    i.invoiceType === 'installment' ? 'أقساط' : 'ماستركارد';
+                  const remaining = i.remainingAmount || 0;
                   return (
                     <tr key={i.id} className={`${index % 2 === 0 ? 'bg-slate-800/30' : 'bg-slate-900'} print-break-inside-avoid`}>
-                      <td className="p-4 font-mono font-bold text-slate-300">#{i.id}</td>
-                      <td className="p-4 text-sm font-bold text-slate-500">{new Date(i.date).toLocaleDateString('ar-IQ')}</td>
-                      <td className="p-4 font-mono font-black text-white">{formatIQD(i.finalAmount)}</td>
-                      <td className="p-4 font-mono font-bold text-slate-500">{formatIQD(cost)}</td>
-                      <td className="p-4 font-mono font-black text-emerald-400 bg-emerald-950/20">{formatIQD(profit)}</td>
+                      <td className="p-3 font-mono font-bold text-slate-300">#{i.invoiceNumber || i.id}</td>
+                      <td className="p-3 text-slate-400">{new Date(i.date).toLocaleDateString('ar-IQ')}</td>
+                      <td className="p-3 font-bold text-white">{i.customerName || 'عميل نقدي'}</td>
+                      <td className="p-3 font-bold text-slate-300">{typeLabel}</td>
+                      <td className="p-3 font-mono font-black text-white">{formatIQD(i.finalAmount)}</td>
+                      <td className="p-3 font-mono font-black text-rose-400">{remaining > 0 ? formatIQD(remaining) : '—'}</td>
+                      <td className="p-3 font-mono font-bold text-slate-400">{formatIQD(cost)}</td>
+                      <td className="p-3 font-mono font-black text-emerald-400 bg-emerald-950/20">{formatIQD(profit)}</td>
                     </tr>
                   );
                 })}
                 {calculatedInvoices.length === 0 && (
                   <tr>
-                    <td colSpan={5} className="p-8 text-center text-slate-500 font-bold">لا توجد فواتير لهذه الفترة.</td>
+                    <td colSpan={8} className="p-8 text-center text-slate-500 font-bold">لا توجد فواتير لهذه الفترة.</td>
                   </tr>
                 )}
               </tbody>
@@ -667,14 +797,16 @@ export default function ReportsScreen({ onNavigate, permissions }: ReportsScreen
               <div className="mt-2 text-xs font-bold text-slate-400">{totalSales > 0 ? Math.round((marginProfit / totalSales) * 100) : 0}% هامش ربح</div>
             </div>
             <div className="bg-slate-800 rounded-3xl p-6 border border-slate-700 shadow-lg">
-               <h4 className="font-bold text-slate-300 mb-4 text-sm">تقسيم المبيعات (نقدي/أقساط)</h4>
+               <h4 className="font-bold text-slate-300 mb-4 text-sm">تقسيم المبيعات (نقدي / أقساط / ذمم جزئية)</h4>
                <div className="flex w-full h-4 rounded-full overflow-hidden border border-slate-700">
-                 <div className="bg-blue-500 h-full" style={{ width: `${totalSales > 0 ? (cashSalesTotal / totalSales) * 100 : 0}%` }}></div>
-                 <div className="bg-amber-500 h-full" style={{ width: `${totalSales > 0 ? (instSalesTotal / totalSales) * 100 : 0}%` }}></div>
+                 <div className="bg-blue-500 h-full" style={{ width: `${totalSales > 0 ? (cashSalesTotal / totalSales) * 100 : 0}%` }} title="نقدي"></div>
+                 <div className="bg-amber-500 h-full" style={{ width: `${totalSales > 0 ? (instSalesTotal / totalSales) * 100 : 0}%` }} title="أقساط"></div>
+                 <div className="bg-cyan-500 h-full" style={{ width: `${totalSales > 0 ? (partialSalesTotal / totalSales) * 100 : 0}%` }} title="ذمم جزئية"></div>
                </div>
                <div className="mt-2 text-xs font-bold flex justify-between">
                  <span className="text-blue-400">نقدي: {totalSales > 0 ? Math.round((cashSalesTotal / totalSales) * 100) : 0}%</span>
                  <span className="text-amber-400">أقساط: {totalSales > 0 ? Math.round((instSalesTotal / totalSales) * 100) : 0}%</span>
+                 <span className="text-cyan-400">ذمم جزئية: {totalSales > 0 ? Math.round((partialSalesTotal / totalSales) * 100) : 0}%</span>
                </div>
             </div>
           </div>
