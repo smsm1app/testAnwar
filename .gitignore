@@ -13,3 +13,9 @@ npm-debug.log*
 # Old JSON database files (replaced by Supabase)
 solar_energy_erp_db.json
 solar_erp_safety_backup_*.json
+
+.data/
+playwright-report/
+test-results/
+muamalabda3-main/
+

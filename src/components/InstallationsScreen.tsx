@@ -483,10 +483,10 @@ export default function InstallationsScreen({ permissions, currentUser }: Instal
         api.getInvoices().catch(() => [])
       ]);
 
-      setTeams(Array.isArray(tRes) ? tRes : []);
-      setBookings(Array.isArray(bRes) ? bRes : []);
-      setCustomers(Array.isArray(cRes) ? cRes.filter((c: any) => !c.isDeleted) : []);
-      setInvoices(Array.isArray(iRes) ? iRes : []);
+      setTeams(Array.isArray(tRes) ? tRes : (tRes?.data || []));
+      setBookings(Array.isArray(bRes) ? bRes : (bRes?.data || []));
+      setCustomers((Array.isArray(cRes) ? cRes : (cRes?.data || [])).filter((c: any) => !c.isDeleted));
+      setInvoices(Array.isArray(iRes) ? iRes : (iRes?.data || []));
     } catch (err) {
       toast.error('فشل في تحميل بيانات طواقم التركيبات الأساسية');
     } finally {

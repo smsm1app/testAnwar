@@ -142,11 +142,11 @@ function MaintenanceScreen({ permissions }: MaintenanceScreenProps) {
         api.getArchives().catch(() => []),
         api.getInverterExchanges().catch(() => [])
       ]);
-      setMaintenance(Array.isArray(mntRes) ? mntRes : []);
-      setFaults(Array.isArray(faultRes) ? faultRes : []);
-      setCustomers(Array.isArray(custRes) ? custRes : []);
-      setInvoices(Array.isArray(invRes) ? invRes : []);
-      setCategories(Array.isArray(catRes) ? catRes : []);
+      setMaintenance(Array.isArray(mntRes) ? mntRes : (mntRes?.data || []));
+      setFaults(Array.isArray(faultRes) ? faultRes : (faultRes?.data || []));
+      setCustomers(Array.isArray(custRes) ? custRes : (custRes?.data || []));
+      setInvoices(Array.isArray(invRes) ? invRes : (invRes?.data || []));
+      setCategories(Array.isArray(catRes) ? catRes : (catRes?.data || []));
       setBookings(Array.isArray(bookRes) ? bookRes : []);
       setTeams(Array.isArray(teamRes) ? teamRes : []);
       setWorkers(Array.isArray(workersRes) ? workersRes : []);

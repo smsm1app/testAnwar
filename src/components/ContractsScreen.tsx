@@ -76,9 +76,9 @@ export default function ContractsScreen({ permissions }: ContractsScreenProps) {
         api.getInvoices().catch(() => []),
         api.getSettings().catch(() => ({}))
       ]);
-      setContracts(Array.isArray(contractsRes) ? contractsRes : []);
-      setCustomers(Array.isArray(custRes) ? custRes : []);
-      setInvoices(Array.isArray(invRes) ? invRes : []);
+      setContracts(Array.isArray(contractsRes) ? contractsRes : (contractsRes?.data || []));
+      setCustomers(Array.isArray(custRes) ? custRes : (custRes?.data || []));
+      setInvoices(Array.isArray(invRes) ? invRes : (invRes?.data || []));
       setSettings(settingsRes || {});
     } catch (error: any) {
       toast.error('فشل في تحميل بيانات العقود');
